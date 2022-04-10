@@ -1,40 +1,49 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Arrays;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import main.Main;
 
 /**
  * @author Осипцов Никита, группа 0305
  * <p>Класс основного окна приложения.</p>
  */
 public class Hulk {
-	int wid, hght;
+	protected int wid, hght, currentEntity;
+	protected boolean animated;
 	
-	private JFrame mainPart;
+	protected JFrame mainPart;
 	
-	private JButton helpButton;
-	private JButton addButton;
-	private JButton removeButton;
-	private JButton alterButton;
-	private JButton downloadButton;
-	private JButton saveButton;
-	private JButton searchButton;
-	private JButton[] entities;
+	protected JButton helpButton;
+	protected JButton addButton;
+	protected JButton removeButton;
+	protected JButton alterButton;
+	protected JButton downloadButton;
+	protected JButton saveButton;
+	protected JButton searchButton;
+	protected JButton[] entities;
 	
-	private JScrollPane scroll;
+	protected ClosedTable[] tables;
+	protected JScrollPane[] scrolls;
 	
-	private JTextField searchwhat;
+	protected JTextField searchwhat;
 	
-	private JToolBar workingtb;
-	private JToolBar entitiestb;
-	private JToolBar searchtb;
+	protected JToolBar workingtb;
+	protected JToolBar entitiestb;
+	protected JToolBar searchtb;
 	
-	private JTable table;
-	
-	private JComboBox<String>[] fieldsToSearch;
+	protected JComboBox<String>[] fieldsToSearch;
 	
 	/**
 	 * @param _wid Длина основного окна приложения.
@@ -43,9 +52,10 @@ public class Hulk {
 	public Hulk(int _wid, int _hght) {
 		wid = _wid;
 		hght = _hght;
+		currentEntity = Constants.Entities.length - 1;
 		
 		/**
-		 * Создание одиночных кнопок, приклепление к ним изображений и подсказок
+		 * <p>Создание одиночных кнопок, приклепление к ним изображений и подсказок</p>
 		 */
 		helpButton = new JButton(new ImageIcon("src/main/resources/icons/unknown_4913.png"));
 		helpButton.setToolTipText("Справка");
@@ -60,46 +70,54 @@ public class Hulk {
 		saveButton = new JButton(new ImageIcon("src/main/resources/icons/filesave_8536.png"));
 		saveButton.setToolTipText("Сохранить таблицу в базу данных (старые данные перезапишутся)");
 		searchButton = new JButton("Найти");
+		searchButton.setToolTipText("Найти строки, в колонках которых содержится заданный текст");
 		
 		/**
-		 * Сюда будет вводиться запрос для поиска
+		 * <p>Сюда будет вводиться запрос для поиска</p>
 		 */
 		searchwhat = new JTextField();
+		searchwhat.setToolTipText("Введите текст");
+		searchwhat.setText("Введите текст");
 		
 		/**
-		 * Тулбар для перехода между таблицами
+		 * <p>Тулбар для перехода между таблицами</p>
 		 */
 		entitiestb = new JToolBar();
 		entitiestb.setFloatable(false);
 		entitiestb.setLayout(new GridLayout(Constants.Entities.length, 1));
 		
 		/**
-		 * В этом цикле создаются неодиночные элементы: кнопки для перехода между таблицами и 
-		 * поля сущностей, по которым можно вести поиск. Названия берутся из класса Constants
+		 * <p>В этом цикле создаются неодиночные элементы: кнопки для перехода между таблицами и 
+		 * поля сущностей, по которым можно вести поиск. Названия берутся из класса Constants</p>
 		 */
 		entities = new JButton[Constants.Entities.length];
-		fieldsToSearch = new JComboBox[Constants.Entities.length];
+		fieldsToSearch = new JComboBox[Constants.FieldsNames.length];
+		tables = new ClosedTable[Constants.FieldsNames.length];
+		scrolls = new JScrollPane[Constants.FieldsNames.length];
 		for(int i = 0; i < entities.length; ++i) {
+			tables[i] = new ClosedTable(Constants.FieldsNames[i]);
+			scrolls[i] = new JScrollPane(tables[i]);
+			
 			entities[i] = new JButton(Constants.Entities[i]);
 			fieldsToSearch[i] = new JComboBox<String>(Constants.FieldsNames[i]);
 			entitiestb.add(entities[i]);
 		}
 		
 		/**
-		 * Создание и заполнение тулбара для поиска строк в таблицах
+		 * <p>Создание и заполнение тулбара для поиска строк в таблицах</p>
 		 */
 		searchtb = new JToolBar();
+		searchtb.setLayout(new BorderLayout());
 		searchtb.setFloatable(false);
-		searchtb.add(fieldsToSearch[0]);
-		searchtb.add(searchwhat);
-		searchtb.add(searchButton);
-			
+		searchtb.add(searchwhat, BorderLayout.CENTER);
+		searchtb.add(searchButton, BorderLayout.EAST);
+		searchtb.add(fieldsToSearch[fieldsToSearch.length - 1], BorderLayout.WEST);
+		
 		/**
-		 * Создание и заполнение "рабочего" тулбара, на котором будут кнопки для выполнение основных
-		 * действий с таблицами
+		 * <p>Создание и заполнение "рабочего" тулбара, на котором будут кнопки для выполнение основных
+		 * действий с таблицами</p>
 		 */
 		workingtb = new JToolBar();
-		//workingtb.setLayout(new GroupLayout(workingtb));
 		workingtb.setFloatable(false);
 		workingtb.add(downloadButton);
 		workingtb.add(saveButton);
@@ -108,12 +126,8 @@ public class Hulk {
 		workingtb.add(addButton);
 		workingtb.add(removeButton);
 		
-		
-		table = new JTable(new DefaultTableModel(Constants.SampleCars, Constants.FieldsNames[0]));
-		scroll = new JScrollPane(table);
-		
 		/**
-		 * Сборка окна приложения
+		 * <p>Сборка окна приложения</p>
 		 */
 		mainPart = new JFrame("Станция обслуживания");
 		mainPart.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -123,13 +137,105 @@ public class Hulk {
 		mainPart.add(workingtb, BorderLayout.NORTH);
 		mainPart.add(searchtb, BorderLayout.SOUTH);
 		mainPart.add(entitiestb, BorderLayout.WEST);
-		mainPart.add(scroll, BorderLayout.CENTER);
+		mainPart.add(scrolls[scrolls.length - 1], BorderLayout.CENTER);
+		
+		animate();
 	}
  	
+	private void animate() {
+		for(int i = 0; i < entities.length; ++i) {
+			final int _i = i;
+			entities[i].addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					searchtb.remove(fieldsToSearch[currentEntity]);
+					searchtb.add(fieldsToSearch[_i], BorderLayout.WEST);
+					searchtb.revalidate();
+					searchtb.repaint();
+					mainPart.remove(scrolls[currentEntity]);
+					mainPart.add(scrolls[_i], BorderLayout.CENTER);
+					mainPart.revalidate();
+					entities[currentEntity].setEnabled(true);
+					currentEntity = _i;
+					entities[currentEntity].setEnabled(false);
+				}
+			});
+		}
+		
+		addButton.addActionListener(new AddButtonListener(this));
+		alterButton.addActionListener(new EditButtonListener(this));
+		
+		removeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				var selectedRows = tables[currentEntity].getSelectedRows();
+				
+				if(selectedRows.length > 0 && JOptionPane.showConfirmDialog(mainPart, "Вы действительно хотите удалить выбранные строки?") == JOptionPane.OK_OPTION)
+					for(int row = selectedRows.length - 1; row >= 0; --row) {
+						tables[currentEntity].deleteRow(selectedRows[row]);
+						Main.megaList[currentEntity].remove(selectedRows[row]);
+					}
+			}
+		});
+		
+		searchButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(currentEntity == Constants.Entities.length - 1)
+					return;
+				
+				tables[currentEntity].clearSelection();
+				
+				int colIndex = tables[currentEntity].getColumnIndex(fieldsToSearch[currentEntity].getSelectedItem().toString());
+				var selectionModel = tables[currentEntity].getSelectionModel();
+				
+				for(int i = 0; i < tables[currentEntity].rowCount; ++i)
+					if(tables[currentEntity].getValueAt(i, colIndex).toString().equals(searchwhat.getText()))
+						selectionModel.addSelectionInterval(i, i);
+				if(tables[currentEntity].getSelectedRows().length > 0)
+					JOptionPane.showMessageDialog(mainPart, "Поиск выполнен успешно.");
+				else
+					JOptionPane.showMessageDialog(mainPart, "Ничего не найдено.");
+			}
+		});
+		
+		searchwhat.addKeyListener(new KeyListener() {
+			public void keyTyped(KeyEvent e) {}
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER)
+					searchButton.getActionListeners()[0].actionPerformed(null);
+			}
+			
+		});
+		
+		helpButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(mainPart, "Графический интерфейс для работы с базой автосервиса."
+						+ "\nВыполнил: студент группы 0305, Осипцов Никита."
+						+ "\n\nДобавление: нажать на соответствующую кнопку, заполнить появшуюся строку, нажать Enter. Прервать нажатием Escape."
+						+ "\nУдаление: выбрать нужные строки таблицы, нажать на соответствующую кнопку."
+						+ "\nРедактирование: выбрать нужную строку, нажать на соответствующую кнопку. Изменить редактируемую строку, нажать Enter. Прервать нажатием Escape."
+						+ "\nПоиск: в выпадающем списке выбрать название колонки, по которой хотите искать, в поле введите значение, которое хотите найти в этой колонке. Будут выбраны все подходящие строки.");
+			}
+			
+		});
+	}
 	/**
 	 * <p>Делает окно видимым.</p>
 	 */
-	public void Show() {
-		mainPart.setVisible(true);
+	public void setVisible(boolean visible) {
+		mainPart.setVisible(visible);
+	}
+	
+	public void setContentEnabled(boolean enabled) {
+		for(var comp : workingtb.getComponents())
+			comp.setEnabled(enabled);
+		for(var comp : searchtb.getComponents())
+			comp.setEnabled(enabled);
+		for(var comp : entitiestb.getComponents())
+			comp.setEnabled(enabled);
+		if(enabled)
+			entities[currentEntity].setEnabled(false);
 	}
 }

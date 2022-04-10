@@ -3,27 +3,49 @@ package classes;
 import java.util.ArrayList;
 import javax.persistence.*;
 
+/**
+ * @author Осипцов Никита, группа 0305
+ *	<p>Класс специальности</p>
+ */
+
 @Entity
 @Table(name = "speciality")
 public class Speciality {
-	
-	private String name;
-	private ArrayList<Integer> workersIds;
-	
 	@Id
 	@Column(name = "spec_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
+	@Column(name = "name")
+	private String name;
+	@ManyToMany(mappedBy = "specialities")
+	private ArrayList<Worker> workers;
+	
+	public Speciality() {}
+	public Speciality(int _id) {id = _id;}
+	
 	public int GetId() { return id;}
 	public void SetId(int _id) { id = _id;}
 	
-	@Column(name = "name")
 	public String GetName() { return name; }
-	public void SetName(String _name) { name = _name; }
+	public boolean SetName(String _name) {
+		if (_name != null && _name.length() > 0 && !_name.contains("||")) {
+			name = _name;
+			return true;
+		}
+		return false;
+	}
 	
-	@ElementCollection
-	@CollectionTable(name = "workers_of_speciality", joinColumns=@JoinColumn(name="id"))
-	@Column(name = "worker_id")
-	public ArrayList<Integer> GetWorkersIds() { return workersIds; }
-	public void SetWorkersIds(ArrayList<Integer> _workersIds) { workersIds = _workersIds; }
+	public ArrayList<Worker> GetWorkers() { return workers; }
+	public boolean AddWorker(Worker worker) {
+		if (worker != null && !workers.contains(worker)) {
+			workers.add(worker);
+			return true;
+		}
+		else return false;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 }
