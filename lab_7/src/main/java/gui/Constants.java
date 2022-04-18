@@ -34,12 +34,12 @@ class Constants {
 	/**
 	 * ѕути до файлов csv, куда сохран€ютс€ и откуда загружаютс€ таблицы
 	 */
-	public static final String[] csvPaths = {
-			"cars.csv",
-			"owners.csv",
-			"reports.csv",
-			"specs.csv",
-			"workers.csv"
+	public static final String[] xmlPaths = {
+			"cars.xml",
+			"owners.xml",
+			"reports.xml",
+			"specs.xml",
+			"workers.xml"
 	};
 	
 	/**

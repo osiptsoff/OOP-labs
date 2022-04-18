@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import gui.*;
 
 public class Main {
-	public static int lastId = 0;
+	public static int[] lastIds = {0, 0, 0, 0, 0};
 	public static ArrayList<Object> carList = new ArrayList<Object>();
 	public static ArrayList<Object> ownerList = new ArrayList<Object>();
 	public static ArrayList<Object> reportList = new ArrayList<Object>();
