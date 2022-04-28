@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="82e66139-ffc6-4a3f-b26e-ba1a42bf04e9">
+	<property name="ireport.zoom" value="1.948717100000002"/>
+	<property name="ireport.x" value="77"/>
+	<property name="ireport.y" value="0"/>
+	<queryString language="xPath">
+		<![CDATA[objlist/object]]>
+	</queryString>
+	<field name="field_0" class="java.lang.String">
+		<fieldDescription><![CDATA[@field_0]]></fieldDescription>
+	</field>
+	<field name="field_1" class="java.lang.String">
+		<fieldDescription><![CDATA[@field_1]]></fieldDescription>
+	</field>
+	<field name="field_2" class="java.lang.String">
+		<fieldDescription><![CDATA[@field_2]]></fieldDescription>
+	</field>
+	<field name="field_3" class="java.lang.String">
+		<fieldDescription><![CDATA[@field_3]]></fieldDescription>
+	</field>
+	<field name="field_4" class="java.lang.String">
+		<fieldDescription><![CDATA[@field_4]]></fieldDescription>
+	</field>
+	<background>
+		<band/>
+	</background>
+	<title>
+		<band height="72">
+			<frame>
+				<reportElement mode="Opaque" x="-20" y="-20" width="595" height="92" backcolor="#006699" uuid="b9770640-9253-470f-8ac0-7dc401354d7c"/>
+				<staticText>
+					<reportElement x="20" y="20" width="234" height="43" forecolor="#FFFFFF" uuid="3463f03c-d486-4e66-b4f4-2b23797e5db8"/>
+					<textElement>
+						<font size="34" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Отчёт]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="395" y="43" width="180" height="20" forecolor="#FFFFFF" uuid="033a3310-733e-460e-a8e1-f80245a8c3b5"/>
+					<textElement textAlignment="Right">
+						<font size="14" isBold="false"/>
+					</textElement>
+					<text><![CDATA[По лабораторной работе]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="13"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="21">
+			<line>
+				<reportElement x="-20" y="20" width="595" height="1" forecolor="#666666" uuid="cb9a0379-69c8-48ec-8b01-4bedccd23acb"/>
+			</line>
+			<staticText>
+				<reportElement x="39" y="1" width="100" height="20" uuid="fa265fc1-4cdc-4f9f-b3b8-1a6832307d12"/>
+				<text><![CDATA[ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="139" y="1" width="100" height="20" uuid="81b97a64-9481-4f74-995f-27467ccefe57"/>
+				<text><![CDATA[Бренд]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="239" y="1" width="100" height="20" uuid="688ce5d8-1c4e-42ac-aa7b-52e75f0ff284"/>
+				<text><![CDATA[Описание проблемы]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="339" y="1" width="100" height="20" uuid="7226f3af-80b3-4162-a988-6a9dbf95e57d"/>
+				<text><![CDATA[Год выпуска]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="439" y="1" width="100" height="20" uuid="b56f02c6-ef0d-43d4-8af9-a6f3881601f4"/>
+				<text><![CDATA[Пробег]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="19" width="555" height="1" uuid="186f6bbb-a3f8-4f5b-befa-3d045460e610"/>
+			</line>
+			<textField>
+				<reportElement x="39" y="0" width="100" height="20" uuid="ebafe0e8-f7e6-472d-81a1-580aebb3b75a"/>
+				<textFieldExpression><![CDATA[$F{field_0}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="139" y="0" width="100" height="20" uuid="d59aac30-e18d-4248-b1cd-82182ba95813"/>
+				<textFieldExpression><![CDATA[$F{field_1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="239" y="0" width="100" height="20" uuid="e8327a7a-3ec0-4f4e-8ba6-09b5a2209f83"/>
+				<textFieldExpression><![CDATA[$F{field_2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="339" y="0" width="100" height="20" uuid="b292b26c-01d5-4baa-9684-72ebc3da949b"/>
+				<textFieldExpression><![CDATA[$F{field_3}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="439" y="0" width="100" height="20" uuid="990fa037-7b58-468d-9aa1-e219dbaf08fb"/>
+				<textFieldExpression><![CDATA[$F{field_4}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band/>
+	</columnFooter>
+	<pageFooter>
+		<band height="17">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="4" width="515" height="13" backcolor="#E6E6E6" uuid="2f71526a-3353-456a-9e38-845691f23deb"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement mode="Opaque" x="515" y="4" width="40" height="13" backcolor="#E6E6E6" uuid="11d2b786-63de-45aa-bdc7-061c554f0cdf"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="0" y="4" width="100" height="13" uuid="13d012dc-551e-44a5-9ebe-2c4f33fd8d13"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band/>
+	</summary>
+</jasperReport>

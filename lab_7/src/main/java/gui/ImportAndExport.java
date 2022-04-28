@@ -3,12 +3,14 @@ package gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -38,12 +40,15 @@ class ImportButtonListener implements ActionListener {
 		
 		
 		try {
+			FileReader fr = new FileReader(Constants.xmlPaths[hulk.currentEntity]);
+			fr.close();
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			doc = builder.parse(new File(Constants.xmlPaths[hulk.currentEntity]));
 			doc.getDocumentElement().normalize();
 		} catch (Exception e1) {
 			JOptionPane.showMessageDialog(hulk.mainPart, "Неудача при попытке доступа и разбора файла. Остановлено."
 					+ "\nВозможно, файла не существует или его структура нарушена.");
+			return;
 		}
 		
 		table.selectAll();
@@ -98,6 +103,7 @@ class ExportButtonListener implements ActionListener {
 		try {
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			doc = builder.newDocument();
+			doc.setXmlStandalone(true);
 		} catch (ParserConfigurationException e1) {
 			JOptionPane.showMessageDialog(hulk.mainPart, "Неудача при создании файла. Остановлено.");
 			return;
@@ -117,7 +123,8 @@ class ExportButtonListener implements ActionListener {
 		
 		try {
 			Transformer trans = TransformerFactory.newInstance().newTransformer();
-			java.io.FileWriter fw = new FileWriter(Constants.xmlPaths[hulk.currentEntity]);
+			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			FileWriter fw = new FileWriter(Constants.xmlPaths[hulk.currentEntity]);
 			trans.transform(new DOMSource(doc), new StreamResult(fw));
 			fw.close();
 			JOptionPane.showMessageDialog(hulk.mainPart, "Таблица успешно сохранена.");
