@@ -4,8 +4,8 @@ import classes.*;
 import main.Main;
 
 final class ObjectEditor {
-	
-	public static void editCar(Object _car, Object[] row, ClosedTable table) throws IncorrectDataException {
+	public static void editCar(Object _car, Object[] row, Hulk hulk, boolean reledit) throws IncorrectDataException {
+		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Car car = (Car)_car;
 		boolean succsess;
 		
@@ -14,8 +14,21 @@ final class ObjectEditor {
 				&& car.SetReleaseYear((String)row[3])
 				&& car.SetMileage((String)row[4]);
 		
+		if(succsess && reledit) {
+			int related = Constants.relatedEntities[hulk.currentEntity][0];
+			var selectedRows = hulk.tables[related].getSelectedRows();
+			
+			if(selectedRows.length > 0)
+				car.SetOwner((Owner)Main.ownerList.get(selectedRows[selectedRows.length - 1]));
+			
+			if(car.GetOwner() != null)
+				table.setValueAt(Integer.toString(car.GetOwner().GetId()), table.editedRow, 5);
+			else
+				table.setValueAt("", table.editedRow, 5);
+		}
+		
 		if (succsess) {
-			table.setValueAt(car.GetId(), table.editedRow, 0);
+			table.setValueAt(Integer.toString(car.GetId()), table.editedRow, 0);
 			table.setValueAt(car.GetBrand(), table.editedRow, 1);
 			table.setValueAt(car.GetProblemDescription(), table.editedRow, 2);
 			table.setValueAt(Integer.toString(car.GetReleaseYear()), table.editedRow, 3);
@@ -24,7 +37,8 @@ final class ObjectEditor {
 		else throw new IncorrectDataException();
 	}
 	
-	public static void editOwner(Object _owner, Object[] row, ClosedTable table) throws IncorrectDataException {
+	public static void editOwner(Object _owner, Object[] row, Hulk hulk, boolean reledit) throws IncorrectDataException {
+		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Owner owner = (Owner)_owner;
 		boolean succsess;	
 		
@@ -32,8 +46,28 @@ final class ObjectEditor {
 				&& owner.SetLastName((String)row[2])
 				&& owner.SetPhoneNumber((String)row[3]);
 		
+		if(succsess && reledit) {
+			int related = Constants.relatedEntities[hulk.currentEntity][0];
+			var selectedRows = hulk.tables[related].getSelectedRows();
+			
+			if(selectedRows.length > 0) {
+				owner.GetCars().removeAll(owner.GetCars());
+				for(var rw : selectedRows)
+					owner.AddCar((Car)Main.carList.get(rw));
+			}
+			
+			if(!owner.GetCars().isEmpty()) {
+				String cars = "";
+				for(var car : owner.GetCars())
+					cars += Integer.toString(car.GetId()) + " ";
+				table.setValueAt(cars, table.editedRow, 4);
+			}
+			else
+				table.setValueAt("", table.editedRow, 4);
+		}
+		
 		if(succsess) {
-			table.setValueAt(owner.GetId(), table.editedRow, 0);
+			table.setValueAt(Integer.toString(owner.GetId()), table.editedRow, 0);
 			table.setValueAt(owner.GetName(), table.editedRow, 1);
 			table.setValueAt(owner.GetLastName(), table.editedRow, 2);
 			table.setValueAt(owner.GetPhoneNumber(), table.editedRow, 3);
@@ -42,56 +76,80 @@ final class ObjectEditor {
 		
 	}
 	
-	public static void editReport(Object _report, Object[] row, ClosedTable table) throws IncorrectDataException {
+	public static void editReport(Object _report, Object[] row, Hulk hulk, boolean reledit) throws IncorrectDataException {
+		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Report report = (Report)_report;
 		boolean succsess = true;
 		String repairDate = (String)row[3];
-		int workerId = -1, carId = -1;
 		
 		try {
 			var date = repairDate.split("\\.");
 			
 			succsess = report.SetDate(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
-			carId = Integer.parseInt((String)row[1]);
-			workerId = Integer.parseInt((String)row[2]);
 		}
 		catch(Exception e) { succsess = false; }
 		
-		if(succsess) {
-			for(var worker : Main.workerList)
-				if(((Worker)worker).GetId() == workerId) {
-					report.SetWorker((Worker)worker);
-					break;
-				}
-			for(var car : Main.carList)
-				if(((Car)car).GetId() == carId) {
-					report.SetCar((Car)car);
-					break;
-				}
-			if( report.GetWorker() == null || report.GetCar() == null)
-				succsess = false;
+		if(succsess && reledit) {
+			int relatedCar = Constants.relatedEntities[hulk.currentEntity][0];
+			int relatedWorker = Constants.relatedEntities[hulk.currentEntity][1];
+			var selectedRowsCar = hulk.tables[relatedCar].getSelectedRows();
+			var selectedRowsWorker = hulk.tables[relatedWorker].getSelectedRows();
+			
+			if(selectedRowsCar.length > 0)
+				report.SetCar((Car)Main.carList.get(selectedRowsCar[selectedRowsCar.length - 1]));
+			if(selectedRowsWorker.length > 0)
+				report.SetWorker((Worker)Main.workerList.get(selectedRowsWorker[selectedRowsWorker.length - 1]));
+			
+			if(report.GetCar() != null)
+				table.setValueAt(Integer.toString(report.GetCar().GetId()), table.editedRow, 1);
+			else
+				table.setValueAt("", table.editedRow, 1);
+			if(report.GetWorker() != null)
+				table.setValueAt(Integer.toString(report.GetWorker().GetId()), table.editedRow, 2);
+			else
+				table.setValueAt("", table.editedRow, 2);
 		}
 		
 		if(succsess) {
-			table.setValueAt(report.GetId(), table.editedRow, 0);
-			table.setValueAt(Integer.toString(report.GetCar().GetId()), table.editedRow, 1);
-			table.setValueAt(Integer.toString(report.GetWorker().GetId()), table.editedRow, 2);
+			table.setValueAt(Integer.toString(report.GetId()), table.editedRow, 0);
 			table.setValueAt(report.GetDate(), table.editedRow, 3);
 		}
 		else throw new IncorrectDataException();
 	}
 	
-	public static void editSpeciality(Object _speciality, Object[] row, ClosedTable table) throws IncorrectDataException {
+	public static void editSpeciality(Object _speciality, Object[] row, Hulk hulk, boolean reledit) throws IncorrectDataException {
+		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Speciality speciality = (Speciality)_speciality;
 		
+		if(reledit) {
+			int related = Constants.relatedEntities[hulk.currentEntity][0];
+			var selectedRows = hulk.tables[related].getSelectedRows();
+			
+			if(selectedRows.length > 0) {
+				speciality.GetWorkers().removeAll(speciality.GetWorkers());
+				for(var rw : selectedRows)
+					speciality.AddWorker((Worker)Main.workerList.get(rw));
+			}
+			
+			if(!speciality.GetWorkers().isEmpty()) {
+				String workers = "";
+				for(var worker : speciality.GetWorkers())
+					workers += Integer.toString(worker.GetId()) + " ";
+				table.setValueAt(workers, table.editedRow, 2);
+			}
+			else
+				table.setValueAt("", table.editedRow, 2);
+		}
+		
 		if(speciality.SetName((String)row[1])) {
-			table.setValueAt(speciality.GetId(), table.editedRow, 0);
+			table.setValueAt(Integer.toString(speciality.GetId()), table.editedRow, 0);
 			table.setValueAt(speciality.GetName(), table.editedRow, 1);
 		}
 		else throw new IncorrectDataException();
 	}
 	
-	public static void editWorker(Object _worker, Object[] row, ClosedTable table) throws IncorrectDataException {
+	public static void editWorker(Object _worker, Object[] row, Hulk hulk, boolean reledit) throws IncorrectDataException {
+		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Worker worker = (Worker)_worker;
 		boolean succsess;	
 		
@@ -99,8 +157,28 @@ final class ObjectEditor {
 				&& worker.SetLastName((String)row[2])
 				&& worker.SetPhoneNumber((String)row[3]);
 		
+		if(succsess && reledit) {
+			int related = Constants.relatedEntities[hulk.currentEntity][0];
+			var selectedRows = hulk.tables[related].getSelectedRows();
+			
+			if(selectedRows.length > 0) {
+				worker.GetSpecialities().removeAll(worker.GetSpecialities());
+				for(var rw : selectedRows)
+					worker.AddSpeciality(((Speciality)Main.specList.get(rw)));
+			}
+			
+			if(!worker.GetSpecialities().isEmpty()) {
+				String specs = "";
+				for(var spec : worker.GetSpecialities())
+					specs += Integer.toString(spec.GetId()) + " ";
+				table.setValueAt(specs, table.editedRow, 4);
+			}
+			else
+				table.setValueAt("", table.editedRow, 4);
+		}
+		
 		if(succsess) {
-			table.setValueAt(worker.GetId(), table.editedRow, 0);
+			table.setValueAt(Integer.toString(worker.GetId()), table.editedRow, 0);
 			table.setValueAt(worker.GetName(), table.editedRow, 1);
 			table.setValueAt(worker.GetLastName(), table.editedRow, 2);
 			table.setValueAt(worker.GetPhoneNumber(), table.editedRow, 3);
@@ -110,14 +188,14 @@ final class ObjectEditor {
 	}
 	
 	interface Editor{
-		void func(Object obj, Object[] objList, ClosedTable table) throws IncorrectDataException;
+		void func(Object obj, Object[] objList, Hulk hulk, boolean reledit) throws IncorrectDataException;
 	}
 	public static final Editor[] editors = {
-			(obj, objList, table) -> {editCar(obj, objList, table);},
-			(obj, objList, table) -> {editOwner(obj, objList, table);},
-			(obj, objList, table) -> {editReport(obj, objList, table);},
-			(obj, objList, table) -> {editSpeciality(obj, objList, table);},
-			(obj, objList, table) -> {editWorker(obj, objList, table);},
+			(obj, objList, hulk, re) -> {editCar(obj, objList, hulk, re);},
+			(obj, objList, hulk, re) -> {editOwner(obj, objList, hulk, re);},
+			(obj, objList, hulk, re) -> {editReport(obj, objList, hulk, re);},
+			(obj, objList, hulk, re) -> {editSpeciality(obj, objList, hulk, re);},
+			(obj, objList, hulk, re) -> {editWorker(obj, objList, hulk, re);},
 	};
 	
 	private ObjectEditor() {}
