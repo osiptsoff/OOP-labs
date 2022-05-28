@@ -8,6 +8,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;
 
 import classes.IncorrectDataException;
+import classes.TableFriendly;
 import main.Main;
 
 /**
@@ -30,9 +31,7 @@ final class EditButtonListener implements ActionListener {
 		table = hulk.tables[hulk.currentEntity];
 		var selectedRows = table.getSelectedRows();
 		if(selectedRows.length > 0 && JOptionPane.showConfirmDialog(hulk.mainPart, "Приступить к редактированию строки с ID " + table.getValueAt(selectedRows[0], 0) + "?") == JOptionPane.OK_OPTION) {
-			var backupRow = new Object[table.getColumnCount()];
-			for(int i = 0; i < backupRow.length; ++i)
-				backupRow[i] = table.getValueAt(selectedRows[0], i);
+			var backupRow = ((TableFriendly)Main.megaList.get(hulk.currentEntity).get(selectedRows[0])).toRow();
 			
 			boolean redactRelations = JOptionPane.showConfirmDialog(hulk.mainPart, "Редактировать связи?") == JOptionPane.OK_OPTION;
 			if(redactRelations) {

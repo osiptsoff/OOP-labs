@@ -2,6 +2,8 @@ package classes;
 
 import javax.persistence.*;
 
+import main.Main;
+
 /**
  * @author Осипцов Никита, группа 0305
  * <p>Класс машины</p>
@@ -9,12 +11,11 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "car")
-public class Car implements Removable {
+public class Car implements TableFriendly {
 	@Id
 	@Column(name = "car_id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(targetEntity = Owner.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "person_id")
 	private Owner owner;
 	@Column(name = "brand")
@@ -26,9 +27,11 @@ public class Car implements Removable {
 	@Column(name = "mileage")
 	private int mileage;
 	
+	public Car() {};
 	public Car(int _id) {id =  Integer.parseInt("1" + _id);}
 	
 	public int GetId() { return id;}
+	public void SetId(int _id) { id = _id;}
 	
 	public Owner GetOwner() { return owner; }
 	public void SetOwner(Owner _owner) { owner = _owner;}
@@ -77,20 +80,29 @@ public class Car implements Removable {
 				"' '" + Integer.toString(releaseYear) + "' '" + Integer.toString(mileage) + "'";
 	}
 	
-	/*@Override
-	public boolean equals(Object other) {
-		if(other == null)
-			return false;
-		if(other instanceof Car)
-			return ((Car) other).GetId() == id;
-		else return false;
-	}*/
-	
 	@Override
 	public void remove() {
+		for(var report : Main.megaList.get(2))
+			if( ((Report)report).GetCar() == this )
+				((Report)report).SetCar(null);
+		
 		if(owner != null) {
 			owner.RemoveCar(this);
 			owner = null;
 		}
+	}
+	
+	@Override
+	public Object[] toRow() {
+		var result = new Object[6];
+		
+		result[0] = Integer.valueOf(id);
+		result[1] = brand;
+		result[2] = problemDescription;
+		result[3] = Integer.valueOf(releaseYear);
+		result[4] = Integer.valueOf(mileage);
+		if(owner != null) result[5] = Integer.valueOf(owner.GetId());
+		
+		return result;
 	}
 }

@@ -8,10 +8,9 @@ import javax.persistence.*;
  */
 
 @MappedSuperclass
-class Person {	
+public class Person {	
 	@Id
 	@Column(name = "person_id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	protected int id;
 	@Column(name = "name")
 	protected String name;
@@ -20,9 +19,11 @@ class Person {
 	@Column(name = "phone_number")
 	protected String phoneNumber;
 	
+	public Person() {};
 	public Person(String pref, int _id) {id =  Integer.parseInt(pref + _id); }
 	
 	public int GetId() { return id;}
+	public void SetId(int _id) { id = _id; }
 	
 	public String GetName() {return name;}
 	public boolean SetName(String _name) {
@@ -57,13 +58,4 @@ class Person {
 		return "'" + Integer.toString(id) + "' '" + name + "' '" + lastName +
 				"' '" + phoneNumber + "'";
 	}
-	
-	/*@Override
-	public boolean equals(Object other) {
-		if(other == null)
-			return false;
-		if(other instanceof Person)
-			return ((Person) other).GetId() == id;
-		else return false;
-	}*/
 }

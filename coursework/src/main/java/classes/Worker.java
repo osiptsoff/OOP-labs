@@ -1,9 +1,12 @@
 package classes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.*;
+
+import main.Main;
 
 /**
  * @author Осипцов Никита, группа 0305
@@ -12,8 +15,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "worker")
-public class Worker extends Person implements Removable{
-	public boolean tasked;
+public class Worker extends Person implements TableFriendly{
 	@ManyToMany(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
     @JoinTable(
         name = "worker_speciality", 
@@ -21,6 +23,7 @@ public class Worker extends Person implements Removable{
         inverseJoinColumns = @JoinColumn(name = "spec_id"))
 	private List<Speciality> specialities;
 	
+	public Worker() { specialities = new ArrayList<Speciality>(); }
 	public Worker(int _id) {
 		super("5", _id);
 		specialities = new ArrayList<Speciality>();
@@ -44,8 +47,25 @@ public class Worker extends Person implements Removable{
 
 	@Override
 	public void remove() {
+		for(var report : Main.megaList.get(2))
+			if( ((Report)report).GetWorker() == this )
+				((Report)report).SetWorker(null);
+		
 		for (var spec : specialities)
 			spec.RemoveWorker(this);
 		specialities = null;
+	}
+	
+	@Override
+	public Object[] toRow() {
+		var result = new Object[5];
+		
+		result[0] = Integer.valueOf(id);
+		result[1] = name;
+		result[2] = lastName;
+		result[3] = phoneNumber;
+		result[4] = Arrays.toString(specialities.stream().map(spec -> spec.GetId()).toArray());
+		
+		return result;
 	}
 }

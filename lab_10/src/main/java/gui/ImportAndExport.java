@@ -68,7 +68,7 @@ class ImportButtonListener implements ActionListener {
 			 
 			 var obj = Constants.Constructors[hulk.currentEntity].Instantiate(Integer.parseInt(strToPass[0]));
 			 try {
-			 ObjectEditor.editors[hulk.currentEntity].func(obj, strToPass, hulk, false);
+			 ObjectEditor.editors[hulk.currentEntity].func(obj, strToPass, null, hulk, false);
 			 } catch (Exception e1) {
 				table.stopEditingRow();
 				table.deleteRow(table.rowCount - 1);

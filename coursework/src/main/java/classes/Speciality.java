@@ -1,6 +1,9 @@
 package classes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.*;
 
 /**
@@ -10,22 +13,23 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "speciality")
-public class Speciality implements Removable {
+public class Speciality implements TableFriendly {
 	@Id
 	@Column(name = "spec_id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	@Column(name = "name")
 	private String name;
 	@ManyToMany(mappedBy = "specialities")
-	private ArrayList<Worker> workers;
+	private List<Worker> workers;
 	
+	public Speciality() { workers = new ArrayList<Worker>(); }
 	public Speciality(int _id) {
 		id =  Integer.parseInt("4" + _id);
 		workers = new ArrayList<Worker>();
 		}
 	
 	public int GetId() { return id;}
+	public void SetId(int _id) {id = _id; }
 	
 	public String GetName() { return name; }
 	public boolean SetName(String _name) {
@@ -36,7 +40,7 @@ public class Speciality implements Removable {
 		return false;
 	}
 	
-	public ArrayList<Worker> GetWorkers() { return workers; }
+	public List<Worker> GetWorkers() { return workers; }
 	public boolean AddWorker(Worker worker) {
 		if (worker != null && !workers.contains(worker)) {
 			workers.add(worker);
@@ -55,19 +59,20 @@ public class Speciality implements Removable {
 	@Override
 	public String toString() { return "'" + Integer.toString(id) + "' '" + name +"'"; }
 	
-	/*@Override
-	public boolean equals(Object other) {
-		if(other == null)
-			return false;
-		if(other instanceof Speciality)
-			return ((Speciality) other).GetId() == id;
-		else return false;
-	}*/
-
 	@Override
 	public void remove() {
 		for(var wkr : workers)
 			wkr.RemoveSpeciality(this);
 		workers = null;
+	}
+	
+	public Object[] toRow() {
+		var result = new Object[3];
+		
+		result[0] = Integer.valueOf(id);
+		result[1] = name;
+		result[2] = Arrays.toString(workers.stream().map(wkr -> wkr.GetId()).toArray());
+		
+		return result;
 	}
 }

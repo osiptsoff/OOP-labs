@@ -8,7 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
-import classes.Removable;
+import classes.TableFriendly;
 
 import javax.swing.*;
 
@@ -90,9 +90,9 @@ public class Hulk {
 		alterButton = new JButton(new ImageIcon("src/main/resources/icons/pencil_5373.png"));
 		alterButton.setToolTipText("»зменить выбранную строку");
 		downloadButton = new JButton(new ImageIcon("src/main/resources/icons/down_1680.png"));
-		downloadButton.setToolTipText("—качать данные из базы (таблица не сохранитс€ автоматически)");
+		downloadButton.setToolTipText("—качать данные из базы (таблицы в приложении перезапишутс€)");
 		saveButton = new JButton(new ImageIcon("src/main/resources/icons/filesave_8536.png"));
-		saveButton.setToolTipText("—охранить таблицу в базу данных (старые данные перезапишутс€)");
+		saveButton.setToolTipText("—охранить данные в базу (старые данные перезапишутс€)");
 		searchButton = new JButton("Ќайти");
 		searchButton.setToolTipText("Ќайти строки, в колонках которых содержитс€ заданный текст");
 		relinfoButton = new JButton("»нформаци€ о св€з€х");
@@ -228,9 +228,11 @@ public class Hulk {
 				if(selectedRows.length > 0 && (e == null || JOptionPane.showConfirmDialog(mainPart, "¬ы действительно хотите удалить выбранные строки?") == JOptionPane.OK_OPTION))
 					for(int row = selectedRows.length - 1; row >= 0; --row) {
 						tables[currentEntity].deleteRow(selectedRows[row]);
-						Removable obj = (Removable) Main.megaList.get(currentEntity).get(selectedRows[row]);
-						obj.remove();
-						Main.megaList.get(currentEntity).remove(obj);
+						if(e != null) {
+							TableFriendly obj = (TableFriendly) Main.megaList.get(currentEntity).get(selectedRows[row]);
+							obj.remove();
+							Main.megaList.get(currentEntity).remove(obj);
+						}
 					}
 			}
 		});

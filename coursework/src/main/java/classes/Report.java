@@ -9,23 +9,24 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "report")
-public class Report implements Removable {
+public class Report implements TableFriendly {
 	@Id
 	@Column(name = "report_id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	@OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+	@OneToOne(targetEntity = Car.class, fetch = FetchType.LAZY)
+	@JoinColumn(name = "car_id")
 	private Car car;
-	@OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+	@OneToOne(targetEntity = Worker.class, fetch = FetchType.LAZY)
+	@JoinColumn(name = "person_id")
 	private Worker worker;
 	@Column(name = "repair_date")
 	private String repairDate;
 	
+	public Report() {};
 	public Report(int _id) {id =  Integer.parseInt("3" + _id);}
 	
 	public int GetId() { return id;}
+	public void SetId(int _id) {id = _id; }
 	
 	public Car GetCar() { return car; }
 	public void SetCar(Car _car) { car = _car; }
@@ -43,16 +44,19 @@ public class Report implements Removable {
 	
 	@Override
 	public String toString() {return "'" + repairDate + "'"; }
-	
-	/*@Override
-	public boolean equals(Object other) {
-		if(other == null)
-			return false;
-		if(other instanceof Report)
-			return ((Report) other).GetId() == id;
-		else return false;
-	}*/
 
 	@Override
 	public void remove() { }
+	
+	@Override
+	public Object[] toRow() {
+		var result = new Object[4];
+		
+		result[0] = Integer.valueOf(id);
+		if(car != null) result[1] = Integer.valueOf(car.GetId());
+		if(worker != null) result[2] = Integer.valueOf(worker.GetId());
+		result[3] = repairDate;
+		
+		return result;
+	}
 }
