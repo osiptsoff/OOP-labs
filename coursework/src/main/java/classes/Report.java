@@ -13,10 +13,10 @@ public class Report implements TableFriendly {
 	@Id
 	@Column(name = "report_id")
 	private int id;
-	@OneToOne(targetEntity = Car.class, fetch = FetchType.LAZY)
+	@OneToOne(targetEntity = Car.class, fetch = FetchType.EAGER)
 	@JoinColumn(name = "car_id")
 	private Car car;
-	@OneToOne(targetEntity = Worker.class, fetch = FetchType.LAZY)
+	@OneToOne(targetEntity = Worker.class, fetch = FetchType.EAGER)
 	@JoinColumn(name = "person_id")
 	private Worker worker;
 	@Column(name = "repair_date")
@@ -44,6 +44,14 @@ public class Report implements TableFriendly {
 	
 	@Override
 	public String toString() {return "'" + repairDate + "'"; }
+	
+	@Override
+	public boolean equals(Object other) {
+		if(other == null) return false;
+		if(other instanceof Report)
+			return ((Report) other).id == id;
+		else return false;
+	}
 
 	@Override
 	public void remove() { }

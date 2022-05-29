@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.persistence.*;
 
+import main.Main;
+
 /**
  * @author Осипцов Никита, группа 0305
  * <p>Класс владельца машины</p>
@@ -15,8 +17,7 @@ import javax.persistence.*;
 public class Owner extends Person implements TableFriendly {
 	@OneToMany(	targetEntity = Car.class,
 				mappedBy = "owner",
-				cascade = CascadeType.ALL,
-				orphanRemoval = true)
+				cascade = CascadeType.ALL)
 	private List<Car> cars;
 	
 	public Owner() {
@@ -37,7 +38,7 @@ public class Owner extends Person implements TableFriendly {
 		else return false;
 	}
 	public boolean RemoveCar(Car car) {
-		if (car != null && cars.contains(car)) {
+		if (car != null) {
 			cars.remove(car);
 			return true;
 		}
@@ -46,10 +47,9 @@ public class Owner extends Person implements TableFriendly {
 
 	@Override
 	public void remove() {
-		for(var car : cars)
-			if(car.GetOwner() != null && car.GetOwner() == this) {
-				car.SetOwner(null);
-			}
+		for(var car : Main.megaList.get(0))
+			if(((Car)car).GetOwner().equals(this))
+				((Car)car).SetOwner(null);
 		cars = null;
 	}
 	

@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.persistence.*;
 
+import main.Main;
+
 /**
  * @author Осипцов Никита, группа 0305
  *	<p>Класс специальности</p>
@@ -19,7 +21,11 @@ public class Speciality implements TableFriendly {
 	private int id;
 	@Column(name = "name")
 	private String name;
-	@ManyToMany(mappedBy = "specialities")
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+        name = "worker_speciality", 
+        joinColumns = @JoinColumn(name = "spec_id"), 
+        inverseJoinColumns = @JoinColumn(name = "person_id"))
 	private List<Worker> workers;
 	
 	public Speciality() { workers = new ArrayList<Worker>(); }
@@ -49,7 +55,7 @@ public class Speciality implements TableFriendly {
 		else return false;
 	}
 	public boolean RemoveWorker(Worker worker) {
-		if (worker != null && workers.contains(worker)) {
+		if (worker != null) {
 			workers.remove(worker);
 			return true;
 		}
@@ -60,9 +66,17 @@ public class Speciality implements TableFriendly {
 	public String toString() { return "'" + Integer.toString(id) + "' '" + name +"'"; }
 	
 	@Override
+	public boolean equals(Object other) {
+		if(other == null) return false;
+		if(other instanceof Speciality)
+			return ((Speciality) other).id == id;
+		else return false;
+	}
+	
+	@Override
 	public void remove() {
-		for(var wkr : workers)
-			wkr.RemoveSpeciality(this);
+		for(var wkr : Main.megaList.get(4))
+			((Worker)wkr).RemoveSpeciality(this);
 		workers = null;
 	}
 	

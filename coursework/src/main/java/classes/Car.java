@@ -2,6 +2,8 @@ package classes;
 
 import javax.persistence.*;
 
+import org.hibernate.Hibernate;
+
 import main.Main;
 
 /**
@@ -15,7 +17,7 @@ public class Car implements TableFriendly {
 	@Id
 	@Column(name = "car_id")
 	private int id;
-	@ManyToOne(targetEntity = Owner.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(targetEntity = Owner.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "person_id")
 	private Owner owner;
 	@Column(name = "brand")
@@ -81,15 +83,23 @@ public class Car implements TableFriendly {
 	}
 	
 	@Override
+	public boolean equals(Object other) {
+		other = Hibernate.unproxy(other);
+		if(other == null) return false;
+		if(other instanceof Car)
+			return ((Car) other).id == id;
+		else return false;
+	}
+	
+	@Override
 	public void remove() {
 		for(var report : Main.megaList.get(2))
-			if( ((Report)report).GetCar() == this )
+			if( ((Report)report).GetCar() != null && ((Report)report).GetCar().equals(this) )
 				((Report)report).SetCar(null);
 		
-		if(owner != null) {
-			owner.RemoveCar(this);
-			owner = null;
-		}
+		if(owner != null)
+			for(var ownr : Main.megaList.get(1))
+				((Owner)ownr).RemoveCar(this);
 	}
 	
 	@Override

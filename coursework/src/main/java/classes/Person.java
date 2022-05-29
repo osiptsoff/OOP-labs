@@ -58,4 +58,12 @@ public class Person {
 		return "'" + Integer.toString(id) + "' '" + name + "' '" + lastName +
 				"' '" + phoneNumber + "'";
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if(other == null) return false;
+		if(other instanceof Person)
+			return ((Person) other).id == id;
+		else return false;
+	}
 }

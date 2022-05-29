@@ -15,12 +15,8 @@ import main.Main;
 
 @Entity
 @Table(name = "worker")
-public class Worker extends Person implements TableFriendly{
-	@ManyToMany(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
-    @JoinTable(
-        name = "worker_speciality", 
-        joinColumns = @JoinColumn(name = "person_id"), 
-        inverseJoinColumns = @JoinColumn(name = "spec_id"))
+public class Worker extends Person implements TableFriendly {
+	@ManyToMany(mappedBy = "workers")
 	private List<Speciality> specialities;
 	
 	public Worker() { specialities = new ArrayList<Speciality>(); }
@@ -38,7 +34,7 @@ public class Worker extends Person implements TableFriendly{
 		else return false;
 	}
 	public boolean RemoveSpeciality(Speciality speciality) {
-		if (speciality != null && specialities.contains(speciality)) {
+		if (speciality != null) {
 			specialities.remove(speciality);
 			return true;
 		}
@@ -48,11 +44,11 @@ public class Worker extends Person implements TableFriendly{
 	@Override
 	public void remove() {
 		for(var report : Main.megaList.get(2))
-			if( ((Report)report).GetWorker() == this )
+			if(((Report)report).GetWorker() != null && ((Report)report).GetWorker().equals(this) )
 				((Report)report).SetWorker(null);
 		
-		for (var spec : specialities)
-			spec.RemoveWorker(this);
+		for(var spec : Main.megaList.get(3))
+			((Speciality)spec).RemoveWorker(this);
 		specialities = null;
 	}
 	
