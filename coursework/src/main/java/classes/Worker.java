@@ -34,23 +34,25 @@ public class Worker extends Person implements TableFriendly {
 		else return false;
 	}
 	public boolean RemoveSpeciality(Speciality speciality) {
-		if (speciality != null) {
-			specialities.remove(speciality);
+		if (speciality != null && specialities.remove(speciality))
 			return true;
-		}
 		else return false;
 	}
 
 	@Override
-	public void remove() {
-		for(var report : Main.megaList.get(2))
-			if(((Report)report).GetWorker() != null && ((Report)report).GetWorker().equals(this) )
-				((Report)report).SetWorker(null);
+	public void cascadeRemove() {
+		specialities.clear();
+		for(var spec : Main.megaList.get(3)) 
+			if( ((Speciality)spec).RemoveWorker(this) && ((Speciality)spec).GetWorkers().isEmpty())
+				specialities.add((Speciality)spec);
+		Main.megaList.get(3).removeAll(specialities);
 		
-		for(var spec : Main.megaList.get(3))
-			((Speciality)spec).RemoveWorker(this);
 		specialities = null;
+		Main.megaList.get(4).remove(this);
 	}
+	
+	@Override
+	public boolean isRelated() { return true; }
 	
 	@Override
 	public Object[] toRow() {

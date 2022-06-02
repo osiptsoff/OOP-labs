@@ -14,7 +14,7 @@ import main.Main;
  * @author Осипцов Никита, группа 0305
  */
 final class MakeAtEnter implements KeyListener {
-	Object obj;
+	TableFriendly obj;
 	ClosedTable table;
 	Hulk hulk;
 	
@@ -22,7 +22,7 @@ final class MakeAtEnter implements KeyListener {
 	 * @param _obj - созданный объект класса T, который должен быть добавлен
 	 * @param _hulk - окно, на котором содержится таблица, куда добавляется строка
 	 */
-	public MakeAtEnter(Object _obj, Hulk _hulk) {
+	public MakeAtEnter(TableFriendly _obj, Hulk _hulk) {
 		obj = _obj;
 		hulk = _hulk;
 		table = hulk.tables[hulk.currentEntity];
@@ -43,10 +43,13 @@ final class MakeAtEnter implements KeyListener {
 				ObjectEditor.editors[hulk.currentEntity].func(obj, table.getRow(table.editedRow), null, hulk, true);
 				++Main.lastIds[hulk.currentEntity];
 				Main.megaList.get(hulk.currentEntity).add(obj);
+				hulk.currentEntityShownRows.add(obj);
 				hulk.setContentEnabled(true);
 				hulk.tables[hulk.currentEntity].stopEditingRow();
 				hulk.tables[hulk.currentEntity].removeKeyListener(this);
 				hulk.selectionFrame.setVisible(false);
+				
+				hulk.revalidateTables();
 			}
 			catch (IncorrectDataException ex) { JOptionPane.showMessageDialog(hulk.mainPart, ex.getMessage()); }
 				
@@ -79,9 +82,9 @@ final class AddButtonListener implements ActionListener {
 	 * объект соответствующего класса. Затем вызывается слушатель клавиатуры для ожидания ввода данных</p>
 	 */
 	public void actionPerformed(ActionEvent e) {
-		
 		table = hulk.tables[hulk.currentEntity];
 		if(hulk.currentEntity != Constants.Entities.length - 1) {
+			hulk.revertButton.getActionListeners()[0].actionPerformed(null);
 			table.addRow();
 			table.startEdittingRow(table.rowCount - 1);
 			hulk.setContentEnabled(false);

@@ -2,8 +2,6 @@ package classes;
 
 import javax.persistence.*;
 
-import org.hibernate.Hibernate;
-
 import main.Main;
 
 /**
@@ -84,7 +82,6 @@ public class Car implements TableFriendly {
 	
 	@Override
 	public boolean equals(Object other) {
-		other = Hibernate.unproxy(other);
 		if(other == null) return false;
 		if(other instanceof Car)
 			return ((Car) other).id == id;
@@ -92,15 +89,21 @@ public class Car implements TableFriendly {
 	}
 	
 	@Override
-	public void remove() {
-		for(var report : Main.megaList.get(2))
-			if( ((Report)report).GetCar() != null && ((Report)report).GetCar().equals(this) )
-				((Report)report).SetCar(null);
+	public void cascadeRemove() {	
+		if(owner != null && owner.GetCars().size() < 2) {
+			Main.megaList.get(1).remove(owner);
+			owner = null;
+		}
 		
 		if(owner != null)
 			for(var ownr : Main.megaList.get(1))
 				((Owner)ownr).RemoveCar(this);
+		
+		Main.megaList.get(0).remove(this);
 	}
+	
+	@Override
+	public boolean isRelated() { return owner != null; }
 	
 	@Override
 	public Object[] toRow() {

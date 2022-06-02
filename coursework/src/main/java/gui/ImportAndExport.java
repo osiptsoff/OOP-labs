@@ -26,21 +26,19 @@ class ImportButtonListener implements ActionListener {
 		
 		for(int i = 0, j; i < Constants.EntitiesClasses.length; ++i) {
 			var res = em.createNativeQuery("SELECT * FROM " + Constants.SQLtablesNames[i], Constants.EntitiesClasses[i]).getResultList();
-			Main.megaList.set(i, (ArrayList<Object>) res);
+			Main.megaList.set(i, (ArrayList<TableFriendly>) res);
 			var lst = Main.megaList.get(i);
 			var table = hulk.tables[i];
-			hulk.entities[i].getActionListeners()[0].actionPerformed(null);
 			
-			table.selectAll();
-			hulk.removeButton.getActionListeners()[0].actionPerformed(null);
+			table.clear();
 			
 			j = 0;
 			for(var obj : lst) {
 				table.addRow();
-				table.setRow(((TableFriendly)obj).toRow(), j++);
+				table.setRow(obj.toRow(), j++);
 			}
 			if(!lst.isEmpty())
-				Main.lastIds[hulk.currentEntity] = Integer.parseInt(Integer.toString(((TableFriendly)lst.get(table.rowCount - 1)).GetId()).substring(1)) + 1;
+				Main.lastIds[i] = Integer.parseInt(Integer.toString(lst.get(table.rowCount - 1).GetId()).substring(1)) + 1;
 		}
 		
 		int j;
@@ -55,7 +53,9 @@ class ImportButtonListener implements ActionListener {
 				++j;
 			}
 		}
-			
+		
+		if(hulk.currentEntity != Constants.Entities.length - 1)
+			hulk.currentEntityShownRows = (ArrayList<TableFriendly>) Main.megaList.get(hulk.currentEntity).clone();
 		
 		em.close();
 		emf.close();
@@ -83,6 +83,7 @@ class ExportButtonListener implements ActionListener {
 		
 		for (var list : Main.megaList)
 			for (var obj : list)
+				if(obj.isRelated())
 					em.persist(obj);
 
 		em.getTransaction().commit();

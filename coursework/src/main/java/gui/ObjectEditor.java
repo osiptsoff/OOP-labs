@@ -4,12 +4,11 @@ import classes.*;
 import main.Main;
 
 final class ObjectEditor {
-	public static void editCar(Object _car, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
+	public static void editCar(TableFriendly _car, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
 		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Car car = (Car)_car;
 		
-		boolean succsess;
-		succsess = car.SetBrand((String)row[1])
+		boolean succsess = car.SetBrand((String)row[1])
 				&& car.SetProblemDescription((String)row[2])
 				&& car.SetReleaseYear((String)row[3])
 				&& car.SetMileage((String)row[4]);
@@ -17,8 +16,11 @@ final class ObjectEditor {
 			int related = Constants.relatedEntities[hulk.currentEntity][0];
 			var selectedRows = hulk.tables[related].getSelectedRows();
 			
-			if(selectedRows.length > 0)
+			if(selectedRows.length > 0) {
+				if(car.GetOwner() != null) car.GetOwner().GetCars().remove(car);
 				car.SetOwner((Owner)Main.megaList.get(1).get(selectedRows[selectedRows.length - 1]));
+				car.GetOwner().AddCar(car);
+			}
 		}
 		
 		if (succsess)
@@ -34,12 +36,11 @@ final class ObjectEditor {
 		}
 	}
 	
-	public static void editOwner(Object _owner, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
+	public static void editOwner(TableFriendly _owner, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
 		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Owner owner = (Owner)_owner;
-		boolean succsess;	
 		
-		succsess = owner.SetName((String)row[1])
+		boolean succsess = owner.SetName((String)row[1])
 				&& owner.SetLastName((String)row[2])
 				&& owner.SetPhoneNumber((String)row[3]);
 		
@@ -47,10 +48,17 @@ final class ObjectEditor {
 			int related = Constants.relatedEntities[hulk.currentEntity][0];
 			var selectedRows = hulk.tables[related].getSelectedRows();
 			
-			if(selectedRows.length > 0) {
-				owner.GetCars().removeAll(owner.GetCars());
-				for(var rw : selectedRows)
-					owner.AddCar((Car)Main.megaList.get(0).get(rw));
+			for(var car : owner.GetCars())
+				car.SetOwner(null);
+				
+			owner.GetCars().removeAll(owner.GetCars());
+				
+			for(var rw : selectedRows)
+				owner.AddCar((Car)Main.megaList.get(0).get(rw));
+				
+			for(var car : owner.GetCars()) {
+				if(car.GetOwner() != null) car.GetOwner().RemoveCar(car);
+				car.SetOwner(owner);
 			}
 		}
 		
@@ -67,17 +75,17 @@ final class ObjectEditor {
 		
 	}
 	
-	public static void editReport(Object _report, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
+	public static void editReport(TableFriendly _report, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
 		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Report report = (Report)_report;
-		boolean succsess = true;
-		
+		boolean succsess;
 		try {
-			var date = ((String)row[3]).split("\\.");
-			
-			succsess = report.SetDate(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
+		succsess = report.setDay(Integer.parseInt((String)row[3])) &&
+				report.setMonth(Integer.parseInt((String)row[4])) &&
+				report.setYear(Integer.parseInt((String)row[5]));
+		} catch(Exception e) {
+			succsess = false;
 		}
-		catch(Exception e) { succsess = false; }
 		
 		if(succsess && reledit) {
 			int relatedCar = Constants.relatedEntities[hulk.currentEntity][0];
@@ -86,23 +94,24 @@ final class ObjectEditor {
 			var selectedRowsWorker = hulk.tables[relatedWorker].getSelectedRows();
 			
 			if(selectedRowsCar.length > 0)
-				report.SetCar((Car)Main.megaList.get(0).get(selectedRowsCar[selectedRowsCar.length - 1]));
+				report.setCarInfo((Car)Main.megaList.get(0).get(selectedRowsCar[selectedRowsCar.length - 1]));
 			if(selectedRowsWorker.length > 0)
-				report.SetWorker((Worker)Main.megaList.get(4).get(selectedRowsWorker[selectedRowsWorker.length - 1]));
+				report.SetWorkerInfo((Worker)Main.megaList.get(4).get(selectedRowsWorker[selectedRowsWorker.length - 1]));
 		}
 		
 		if(succsess)
 			table.setRow(report.toRow(), table.editedRow);
 		else {
 			if(backup != null) {
-				var date = ((String)backup[3]).split("\\.");	
-				succsess = report.SetDate(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
+				report.setDay(Integer.parseInt((String)backup[3]));
+				report.setMonth(Integer.parseInt((String)backup[4]));
+				report.setYear(Integer.parseInt((String)backup[5]));
 			}
 			throw new IncorrectDataException();
 		}
 	}
 	
-	public static void editSpeciality(Object _speciality, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
+	public static void editSpeciality(TableFriendly _speciality, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
 		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Speciality speciality = (Speciality)_speciality;
 		
@@ -115,21 +124,26 @@ final class ObjectEditor {
 			int related = Constants.relatedEntities[hulk.currentEntity][0];
 			var selectedRows = hulk.tables[related].getSelectedRows();
 			
-			if(selectedRows.length > 0) {
-				speciality.GetWorkers().removeAll(speciality.GetWorkers());
-				for(var rw : selectedRows)
-					speciality.AddWorker((Worker)Main.megaList.get(4).get(rw));
-			}	
+			for(var wkr : speciality.GetWorkers())
+				wkr.RemoveSpeciality(speciality);
+				
+			speciality.GetWorkers().removeAll(speciality.GetWorkers());
+				
+			for(var rw : selectedRows)
+				speciality.AddWorker((Worker)Main.megaList.get(4).get(rw));
+				
+			for(var wkr : speciality.GetWorkers())
+				wkr.AddSpeciality(speciality);	
+				
 			table.setRow(speciality.toRow(), table.editedRow);
 		}
 	}
 	
-	public static void editWorker(Object _worker, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
+	public static void editWorker(TableFriendly _worker, Object[] row, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException {
 		ClosedTable table = hulk.tables[hulk.currentEntity];
 		Worker worker = (Worker)_worker;
-		boolean succsess;	
 		
-		succsess = worker.SetName((String)row[1])
+		boolean succsess = worker.SetName((String)row[1])
 				&& worker.SetLastName((String)row[2])
 				&& worker.SetPhoneNumber((String)row[3]);
 		
@@ -137,11 +151,16 @@ final class ObjectEditor {
 			int related = Constants.relatedEntities[hulk.currentEntity][0];
 			var selectedRows = hulk.tables[related].getSelectedRows();
 			
-			if(selectedRows.length > 0) {
-				worker.GetSpecialities().removeAll(worker.GetSpecialities());
-				for(var rw : selectedRows)
-					worker.AddSpeciality(((Speciality)Main.megaList.get(3).get(rw)));
-			}
+			for(var spec : worker.GetSpecialities())
+				spec.RemoveWorker(worker);
+				
+			worker.GetSpecialities().removeAll(worker.GetSpecialities());
+				
+			for(var rw : selectedRows)
+				worker.AddSpeciality(((Speciality)Main.megaList.get(3).get(rw)));
+				
+			for(var spec : worker.GetSpecialities())
+				spec.AddWorker(worker);
 		}
 		
 		if(succsess)
@@ -158,7 +177,7 @@ final class ObjectEditor {
 	}
 	
 	interface Editor{
-		void func(Object obj, Object[] newValues, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException;
+		void func(TableFriendly obj, Object[] newValues, Object[] backup, Hulk hulk, boolean reledit) throws IncorrectDataException;
 	}
 	public static final Editor[] editors = {
 			(obj, newValues, backup, hulk, re) -> {editCar(obj, newValues, backup, hulk, re);},

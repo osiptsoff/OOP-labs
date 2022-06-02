@@ -2,6 +2,8 @@ package classes;
 
 import javax.persistence.*;
 
+import main.Main;
+
 /**
  * @author Осипцов Никита, группа 0305
  *	<p>Класс отчёта</p>
@@ -13,14 +15,16 @@ public class Report implements TableFriendly {
 	@Id
 	@Column(name = "report_id")
 	private int id;
-	@OneToOne(targetEntity = Car.class, fetch = FetchType.EAGER)
-	@JoinColumn(name = "car_id")
-	private Car car;
-	@OneToOne(targetEntity = Worker.class, fetch = FetchType.EAGER)
-	@JoinColumn(name = "person_id")
-	private Worker worker;
-	@Column(name = "repair_date")
-	private String repairDate;
+	@Column(name = "carinfo")
+	private String carInfo;
+	@Column(name = "workerinfo")
+	private String workerInfo;
+	@Column(name = "day")
+	private int day;
+	@Column(name = "month")
+	private int month;
+	@Column(name = "year")
+	private int year;
 	
 	public Report() {};
 	public Report(int _id) {id =  Integer.parseInt("3" + _id);}
@@ -28,22 +32,36 @@ public class Report implements TableFriendly {
 	public int GetId() { return id;}
 	public void SetId(int _id) {id = _id; }
 	
-	public Car GetCar() { return car; }
-	public void SetCar(Car _car) { car = _car; }
+	public String getCarInfo() { return carInfo; }
+	public void setCarInfo(Car _car) { carInfo = _car.toString(); }
 	
-	public Worker GetWorker() { return worker; }
-	public void SetWorker(Worker _worker) { worker = _worker; }
+	public String getWorkerInfo() { return workerInfo; }
+	public void SetWorkerInfo(Worker _worker) { workerInfo = _worker.toString(); }
 	
-	public String GetDate() { return repairDate; }
-	public boolean SetDate(int day, int month, int year) {
-		boolean flag = (day > 0) && (day < 32) && (month > 0) && (month < 13) && (year > 1950);
-		if(flag) 
-			repairDate = day + "." + month + "." + year;
+	public int getDay() { return day; }
+	public boolean setDay(int _day) {
+		boolean flag = (_day > 0) && (_day < 32);
+		if(flag) day = _day;
+		return flag;
+	}
+	
+	public int getMonth() { return month; }
+	public boolean setMonth(int _month) {
+		boolean flag = (_month > 0) && (_month < 13);
+		if(flag) month = _month;
+		return flag;
+	}
+	
+	public int getYear() { return year; }
+	public boolean setYear(int _year) {
+		boolean flag = (_year > 1950);
+		if(flag) year = _year;
 		return flag;
 	}
 	
 	@Override
-	public String toString() {return "'" + repairDate + "'"; }
+	public String toString() {return "\\{" + workerInfo+ "\\} repaired\n"
+			+ "\\{" + carInfo+ "\\}\n at " + day + "\\." + month + "\\." + year ; }
 	
 	@Override
 	public boolean equals(Object other) {
@@ -54,16 +72,21 @@ public class Report implements TableFriendly {
 	}
 
 	@Override
-	public void remove() { }
+	public void cascadeRemove() { Main.megaList.get(2).remove(this); }
+	
+	@Override
+	public boolean isRelated() { return carInfo != null && workerInfo != null; }
 	
 	@Override
 	public Object[] toRow() {
-		var result = new Object[4];
+		var result = new Object[6];
 		
 		result[0] = Integer.valueOf(id);
-		if(car != null) result[1] = Integer.valueOf(car.GetId());
-		if(worker != null) result[2] = Integer.valueOf(worker.GetId());
-		result[3] = repairDate;
+		if(carInfo != null && carInfo != "") result[1] = carInfo.substring(1, carInfo.indexOf("'", 1));
+		if(workerInfo != null && workerInfo != "") result[2] = workerInfo.substring(1, workerInfo.indexOf("'", 1));
+		result[3] = Integer.valueOf(day);
+		result[4] = Integer.valueOf(month);
+		result[5] = Integer.valueOf(year);
 		
 		return result;
 	}

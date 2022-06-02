@@ -61,7 +61,7 @@ final class Constants {
 	public static final String[][] FieldsNames = {
 			{"ID", "Бренд", "Неисправность", "Год выпуска", "Пробег", "Владелец"},
 			{"ID", "Имя", "Фамилия", "Номер телефона", "Машины"},
-			{"ID", "Машина", "Рабочий", "Дата ремонта"},
+			{"ID", "Машина", "Рабочий", "День ремонта", "Месяц ремонта", "Год ремонта"},
 			{"ID", "Название", "Рабочие"},
 			{"ID", "Имя", "Фамилия", "Номер телефона", "Специальности"},
 			{}
@@ -72,7 +72,7 @@ final class Constants {
 	 * Обращаясь к элементам этого массива можно создавать объекты нужного типа.
 	 */
 	interface Constructor{
-		Object Instantiate(int num);
+		TableFriendly Instantiate(int num);
 	}
 	public static final Constructor[] Constructors = {
 			(int num) -> { return new Car(num); },

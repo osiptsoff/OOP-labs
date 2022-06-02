@@ -39,11 +39,9 @@ final class RelinfoButtonListener implements ActionListener {
 			case 2:
 				var report = (Report)packedObj;
 				message = "Отремонтированная машина: " ;
-				if(report.GetCar() != null)
-					message += report.GetCar().toString();
+				message += report.getCarInfo();
 				message += "\nРемонт выполнил: " ;
-				if(report.GetWorker() != null)
-					message += report.GetWorker().toString();
+				message += report.getWorkerInfo();
 				JOptionPane.showMessageDialog(hulk.mainPart, message);
 				break;
 			case 3:

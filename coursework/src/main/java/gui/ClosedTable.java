@@ -63,4 +63,9 @@ public final class ClosedTable extends JTable{
 		
 		return row;
 	}
+	
+	public void clear() {
+		while(rowCount > 0)
+			deleteRow(0);
+	}
 }

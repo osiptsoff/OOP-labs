@@ -30,6 +30,7 @@ public class Owner extends Person implements TableFriendly {
 	}
 	
 	public List<Car> GetCars() { return cars; }
+	
 	public boolean AddCar(Car car) {
 		if (car != null && !cars.contains(car)) {
 			cars.add(car);
@@ -38,20 +39,21 @@ public class Owner extends Person implements TableFriendly {
 		else return false;
 	}
 	public boolean RemoveCar(Car car) {
-		if (car != null) {
-			cars.remove(car);
+		if (car != null && cars.remove(car))
 			return true;
-		}
 		else return false;
 	}
 
 	@Override
-	public void remove() {
-		for(var car : Main.megaList.get(0))
-			if(((Car)car).GetOwner().equals(this))
-				((Car)car).SetOwner(null);
+	public void cascadeRemove() {
+		Main.megaList.get(0).removeAll(cars);
+		
 		cars = null;
+		Main.megaList.get(1).remove(this);
 	}
+	
+	@Override
+	public boolean isRelated() { return !cars.isEmpty(); }
 	
 	@Override
 	public Object[] toRow() {

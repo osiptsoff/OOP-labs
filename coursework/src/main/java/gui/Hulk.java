@@ -20,9 +20,7 @@ import main.Main;
  */
 public class Hulk {
 	protected int wid, hght, currentEntity;
-	
 	protected JFrame mainPart;
-	
 	protected JFrame selectionFrame;
 	protected JTextField sfAddWhat;
 	protected JToolBar sfToolbar;
@@ -35,20 +33,26 @@ public class Hulk {
 	protected JButton alterButton;
 	protected JButton downloadButton;
 	protected JButton saveButton;
-	protected JButton searchButton;
+	protected JButton filterButton;
+	protected JButton revertButton;
 	protected JButton relinfoButton;
+	protected JButton getReportButton;
 	protected JButton[] entities;
 	
 	protected ClosedTable[] tables;
 	protected JScrollPane[] scrolls;
+	protected ArrayList<TableFriendly> currentEntityShownRows;
 	
 	protected JTextField searchwhat;
 	
 	protected JToolBar workingtb;
 	protected JToolBar entitiestb;
 	protected JToolBar searchtb;
+	protected JToolBar searchSubtbParams;
+	protected JToolBar searchSubtbCommands;
 	
 	protected ArrayList<JComboBox<String>> fieldsToSearch;
+	protected JComboBox<String> searchModes;
 	
 	protected void sfPrepare() {
 		selectionFrame.remove(scrolls[sfEntity]);
@@ -73,6 +77,10 @@ public class Hulk {
 	 * @param _wid Длина основного окна приложения.
 	 * @param _hght Ширина основного окна приложения.
 	 */
+	/**
+	 * @param _wid
+	 * @param _hght
+	 */
 	public Hulk(int _wid, int _hght) {
 		wid = _wid;
 		hght = _hght;
@@ -93,10 +101,15 @@ public class Hulk {
 		downloadButton.setToolTipText("Скачать данные из базы (таблицы в приложении перезапишутся)");
 		saveButton = new JButton(new ImageIcon("src/main/resources/icons/filesave_8536.png"));
 		saveButton.setToolTipText("Сохранить данные в базу (старые данные перезапишутся)");
-		searchButton = new JButton("Найти");
-		searchButton.setToolTipText("Найти строки, в колонках которых содержится заданный текст");
+		filterButton = new JButton("Фильтр");
+		filterButton.setToolTipText("Вывести только строки, в колонках которых содержится заданный текст");
+		revertButton = new JButton("Отмена");
+		revertButton.setToolTipText("Отменить фильтрацию");
 		relinfoButton = new JButton("Информация о связях");
-		searchButton.setToolTipText("Показать подробную информацию о связях объекта в выбранной строке");
+		relinfoButton.setToolTipText("Показать подробную информацию о связях объекта в выбранной строке");
+		getReportButton = new JButton("Отчёт");
+		getReportButton.setToolTipText("Получить в формате pdf выбранные отчёты о работе сервиса");
+		getReportButton.setEnabled(false);
 		
 		/**
 		 * <p>Сюда будет вводиться запрос для поиска</p>
@@ -118,8 +131,10 @@ public class Hulk {
 		 */
 		entities = new JButton[Constants.Entities.length];
 		fieldsToSearch = new ArrayList<JComboBox<String>>();
+		searchModes = new JComboBox<String>(new String[]{"содержит", "равняется"});
 		tables = new ClosedTable[Constants.FieldsNames.length];
 		scrolls = new JScrollPane[Constants.FieldsNames.length];
+		currentEntityShownRows = new ArrayList<TableFriendly>();
 		for(int i = 0; i < entities.length; ++i) {
 			tables[i] = new ClosedTable(Constants.FieldsNames[i]);
 			scrolls[i] = new JScrollPane(tables[i]);
@@ -133,11 +148,21 @@ public class Hulk {
 		 * <p>Создание и заполнение тулбара для поиска строк в таблицах</p>
 		 */
 		searchtb = new JToolBar();
+		searchSubtbCommands = new JToolBar();
+		searchSubtbCommands.setFloatable(false);
+		searchSubtbCommands.setLayout(new BorderLayout());
+		searchSubtbCommands.add(filterButton, BorderLayout.WEST);
+		searchSubtbCommands.add(revertButton, BorderLayout.EAST);
+		searchSubtbParams = new JToolBar();
+		searchSubtbParams.setFloatable(false);
+		searchSubtbParams.setLayout(new BorderLayout());
+		searchSubtbParams.add(fieldsToSearch.get(fieldsToSearch.size() - 1), BorderLayout.WEST);
+		searchSubtbParams.add(searchModes, BorderLayout.EAST);
 		searchtb.setLayout(new BorderLayout());
 		searchtb.setFloatable(false);
 		searchtb.add(searchwhat, BorderLayout.CENTER);
-		searchtb.add(searchButton, BorderLayout.EAST);
-		searchtb.add(fieldsToSearch.get(fieldsToSearch.size() - 1), BorderLayout.WEST);
+		searchtb.add(searchSubtbCommands, BorderLayout.EAST);
+		searchtb.add(searchSubtbParams, BorderLayout.WEST);
 		
 		/**
 		 * <p>Создание и заполнение "рабочего" тулбара, на котором будут кнопки для выполнение основных
@@ -152,6 +177,7 @@ public class Hulk {
 		workingtb.add(addButton);
 		workingtb.add(removeButton);
 		workingtb.add(relinfoButton);
+		workingtb.add(getReportButton);
 		
 		/**
 		 * <p>Сборка окна приложения</p>
@@ -202,16 +228,22 @@ public class Hulk {
 		for(int i = 0; i < entities.length; ++i) {
 			final int _i = i;
 			entities[i].addActionListener(new ActionListener() {
+				@SuppressWarnings("unchecked")
 				public void actionPerformed(ActionEvent e) {
-					searchtb.remove(fieldsToSearch.get(currentEntity));
-					searchtb.add(fieldsToSearch.get(_i), BorderLayout.WEST);
-					searchtb.revalidate();
-					searchtb.repaint();
+					searchSubtbParams.remove(fieldsToSearch.get(currentEntity));
+					searchSubtbParams.add(fieldsToSearch.get(_i), BorderLayout.WEST);
+					searchSubtbParams.revalidate();
+					searchSubtbParams.repaint();
 					mainPart.remove(scrolls[currentEntity]);
 					mainPart.add(scrolls[_i], BorderLayout.CENTER);
 					mainPart.revalidate();
+					revertButton.getActionListeners()[0].actionPerformed(null);
 					entities[currentEntity].setEnabled(true);
 					currentEntity = _i;
+					
+					getReportButton.setEnabled(currentEntity == 2);
+					if(currentEntity != Constants.Entities.length - 1)
+						currentEntityShownRows = (ArrayList<TableFriendly>) Main.megaList.get(currentEntity).clone();
 					entities[currentEntity].setEnabled(false);
 				}
 			});
@@ -225,37 +257,64 @@ public class Hulk {
 			public void actionPerformed(ActionEvent e) {
 				var selectedRows = tables[currentEntity].getSelectedRows();
 				
-				if(selectedRows.length > 0 && (e == null || JOptionPane.showConfirmDialog(mainPart, "Вы действительно хотите удалить выбранные строки?") == JOptionPane.OK_OPTION))
+				if(selectedRows.length > 0 && (JOptionPane.showConfirmDialog(mainPart, "Вы действительно хотите удалить выбранные строки?") == JOptionPane.OK_OPTION))
 					for(int row = selectedRows.length - 1; row >= 0; --row) {
 						tables[currentEntity].deleteRow(selectedRows[row]);
-						if(e != null) {
-							TableFriendly obj = (TableFriendly) Main.megaList.get(currentEntity).get(selectedRows[row]);
-							obj.remove();
-							Main.megaList.get(currentEntity).remove(obj);
-						}
+						TableFriendly obj = currentEntityShownRows.get(selectedRows[row]);
+						currentEntityShownRows.remove(obj);
+						obj.cascadeRemove();
+							
+						revalidateTables();
 					}
 			}
 		});
 		
-		searchButton.addActionListener(new ActionListener() {
+		filterButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(currentEntity == Constants.Entities.length - 1)
 					return;
 				
-				tables[currentEntity].clearSelection();
+				tables[currentEntity].selectAll();
 				
 				int colIndex = tables[currentEntity].getColumnIndex(fieldsToSearch.get(currentEntity).getSelectedItem().toString());
 				var selectionModel = tables[currentEntity].getSelectionModel();
 				
 				for(int i = 0; i < tables[currentEntity].rowCount; ++i)
-					if(tables[currentEntity].getValueAt(i, colIndex).toString().equals(searchwhat.getText()))
-						selectionModel.addSelectionInterval(i, i);
-				if(tables[currentEntity].getSelectedRows().length > 0)
-					JOptionPane.showMessageDialog(mainPart, "Поиск выполнен успешно.");
-				else
-					JOptionPane.showMessageDialog(mainPart, "Ничего не найдено.");
+					if(searchModes.getSelectedItem().toString().equals("содержит")) {
+						if(tables[currentEntity].getValueAt(i, colIndex).toString().contains(searchwhat.getText()))
+							selectionModel.removeSelectionInterval(i, i); 
+					} else if(tables[currentEntity].getValueAt(i, colIndex).toString().equals(searchwhat.getText()))
+						selectionModel.removeSelectionInterval(i, i);
+
+				var selection = tables[currentEntity].getSelectedRows();	
+				for(int i = selection.length - 1; i >= 0; --i)
+					currentEntityShownRows.remove(selection[i]);
+				
+				tables[currentEntity].clear();
+				for(var obj : currentEntityShownRows) {
+					tables[currentEntity].addRow();
+					tables[currentEntity].setRow(obj.toRow(), tables[currentEntity].rowCount - 1);
+				}
+					
+				JOptionPane.showMessageDialog(mainPart, "Фильтрация выполнена.");
 			}
+		});
+		
+		revertButton.addActionListener(new ActionListener() {
+			@SuppressWarnings("unchecked")
+			public void actionPerformed(ActionEvent e) {
+				if(currentEntity == Constants.Entities.length - 1)
+					return;
+				
+				currentEntityShownRows = (ArrayList<TableFriendly>) Main.megaList.get(currentEntity).clone();
+				tables[currentEntity].clear();
+				for(var obj : currentEntityShownRows) {
+					tables[currentEntity].addRow();
+					tables[currentEntity].setRow(obj.toRow(), tables[currentEntity].rowCount - 1);
+				}
+			}
+			
 		});
 		
 		searchwhat.addKeyListener(new KeyListener() {
@@ -263,7 +322,7 @@ public class Hulk {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER)
-					searchButton.getActionListeners()[0].actionPerformed(null);
+					filterButton.getActionListeners()[0].actionPerformed(null);
 			}
 			
 		});
@@ -280,9 +339,11 @@ public class Hulk {
 			}
 			
 		});
+		
 		saveButton.addActionListener(new ExportButtonListener(this));
 		downloadButton.addActionListener(new ImportButtonListener(this));
 		relinfoButton.addActionListener(new RelinfoButtonListener(this));
+		getReportButton.addActionListener(new GetReportButtonListener(this));
 	}
 	/**
 	 * <p>Делает окно видимым.</p>
@@ -299,9 +360,26 @@ public class Hulk {
 			comp.setEnabled(enabled);
 		for(var comp : searchtb.getComponents())
 			comp.setEnabled(enabled);
+		for(var comp : searchSubtbParams.getComponents())
+			comp.setEnabled(enabled);
+		for(var comp : searchSubtbCommands.getComponents())
+			comp.setEnabled(enabled);
 		for(var comp : entitiestb.getComponents())
 			comp.setEnabled(enabled);
+		
+		getReportButton.setEnabled(enabled && currentEntity == 2);
 		if(enabled)
 			entities[currentEntity].setEnabled(false);
+	}
+	
+	public void revalidateTables() {
+		for(int i = 0; i < entities.length - 1; ++i) {
+			var lst = i == currentEntity ? currentEntityShownRows : Main.megaList.get(i);
+			tables[i].clear();
+			for (var o : lst) {
+				tables[i].addRow();
+				tables[i].setRow(o.toRow(), tables[i].rowCount - 1);
+			}
+		}
 	}
 }

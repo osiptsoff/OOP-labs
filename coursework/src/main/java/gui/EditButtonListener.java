@@ -8,8 +8,6 @@ import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;
 
 import classes.IncorrectDataException;
-import classes.TableFriendly;
-import main.Main;
 
 /**
  * @author Осипцов Никита, группа 0305
@@ -31,7 +29,7 @@ final class EditButtonListener implements ActionListener {
 		table = hulk.tables[hulk.currentEntity];
 		var selectedRows = table.getSelectedRows();
 		if(selectedRows.length > 0 && JOptionPane.showConfirmDialog(hulk.mainPart, "Приступить к редактированию строки с ID " + table.getValueAt(selectedRows[0], 0) + "?") == JOptionPane.OK_OPTION) {
-			var backupRow = ((TableFriendly)Main.megaList.get(hulk.currentEntity).get(selectedRows[0])).toRow();
+			var backupRow = hulk.currentEntityShownRows.get(selectedRows[0]).toRow();
 			
 			boolean redactRelations = JOptionPane.showConfirmDialog(hulk.mainPart, "Редактировать связи?") == JOptionPane.OK_OPTION;
 			if(redactRelations) {
@@ -40,6 +38,7 @@ final class EditButtonListener implements ActionListener {
 			}
 			
 			table.startEdittingRow(selectedRows[0]);
+			var editted = hulk.currentEntityShownRows.get(selectedRows[0]);
 			hulk.setContentEnabled(false);
 			
 			// Слушатель клавиатуры
@@ -57,11 +56,13 @@ final class EditButtonListener implements ActionListener {
 					 */
 					if(e.getKeyCode() == KeyEvent.VK_ENTER) {
 						try {		
-							ObjectEditor.editors[hulk.currentEntity].func(Main.megaList.get(hulk.currentEntity).get(selectedRows[0]), table.getRow(table.editedRow), backupRow, hulk, redactRelations);
+							ObjectEditor.editors[hulk.currentEntity].func(editted, table.getRow(table.editedRow), backupRow, hulk, redactRelations);
 							hulk.setContentEnabled(true);
 							hulk.tables[hulk.currentEntity].stopEditingRow();
 							hulk.tables[hulk.currentEntity].removeKeyListener(this);
 							hulk.selectionFrame.setVisible(false);
+							if(redactRelations)
+								hulk.revalidateTables();
 							
 						} catch (IncorrectDataException ex) {
 							JOptionPane.showMessageDialog(hulk.mainPart, ex.getMessage());

@@ -3,6 +3,7 @@ package main;
 import java.util.ArrayList;
 
 import gui.*;
+import classes.TableFriendly;
 
 public class Main {
 	public static int[] lastIds = {0, 0, 0, 0, 0};
@@ -12,10 +13,10 @@ public class Main {
 	 * 3 - список специальностей
 	 * 4 - список рабочих
 	 */
-	public static final ArrayList<ArrayList<Object>> megaList = new ArrayList<ArrayList<Object>>();
+	public static final ArrayList<ArrayList<TableFriendly>> megaList = new ArrayList<ArrayList<TableFriendly>>();
 	static {
 		for(int i = 0; i < 5; ++i)
-			megaList.add(new ArrayList<Object>());
+			megaList.add(new ArrayList<TableFriendly>());
 	}
 	
 	public static void main(String[] args) {	

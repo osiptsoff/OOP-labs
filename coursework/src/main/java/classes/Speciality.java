@@ -55,10 +55,8 @@ public class Speciality implements TableFriendly {
 		else return false;
 	}
 	public boolean RemoveWorker(Worker worker) {
-		if (worker != null) {
-			workers.remove(worker);
+		if (worker != null && workers.remove(worker))
 			return true;
-		}
 		else return false;
 	}
 	
@@ -74,11 +72,16 @@ public class Speciality implements TableFriendly {
 	}
 	
 	@Override
-	public void remove() {
+	public void cascadeRemove() {
 		for(var wkr : Main.megaList.get(4))
 			((Worker)wkr).RemoveSpeciality(this);
+		
 		workers = null;
+		Main.megaList.get(3).remove(this);
 	}
+	
+	@Override
+	public boolean isRelated() { return !workers.isEmpty(); }
 	
 	public Object[] toRow() {
 		var result = new Object[3];
